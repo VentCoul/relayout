@@ -1,0 +1,131 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f6f6f7;
+  --fg: #1c1c1e;
+  --muted: #6b6b70;
+  --field: #ffffff;
+  --border: #d0d0d5;
+  --accent: #2860f0;
+  --warn-bg: #fff4d6;
+  --warn-fg: #5c4300;
+  --error: #c0281c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1e20;
+    --fg: #f2f2f4;
+    --muted: #a0a0a8;
+    --field: #2c2c30;
+    --border: #48484e;
+    --accent: #6f9bff;
+    --warn-bg: #4a3a10;
+    --warn-fg: #ffe9a8;
+    --error: #ff8a80;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+main {
+  padding: 20px 24px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+p {
+  margin: 0;
+}
+
+.lead {
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+#permission {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+#permission p {
+  margin: 4px 0 10px;
+  font-size: 13px;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 15px;
+  text-align: center;
+  color: var(--fg);
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+input[type="text"]:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button {
+  font: inherit;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--field);
+  color: var(--fg);
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.error {
+  color: var(--error);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+  margin: 18px 0;
+}
+
+.privacy {
+  color: var(--muted);
+  font-size: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}

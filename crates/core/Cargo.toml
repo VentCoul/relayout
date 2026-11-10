@@ -1,0 +1,7 @@
+[package]
+name = "relayout-core"
+version = "0.1.0"
+edition = "2021"
+description = "Keyboard layout conversion logic. No I/O, no dependencies."
+
+[dependencies]

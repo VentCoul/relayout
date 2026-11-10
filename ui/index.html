@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Relayout</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Relayout</h1>
+      <p class="lead">Виділи текст, набраний не в тій розкладці, і натисни гарячу клавішу. Без виділення виправляється останнє слово.</p>
+
+      <section id="permission" hidden>
+        <strong>Потрібен дозвіл</strong>
+        <p>Щоб копіювати й вставляти виправлений текст, macOS має дозволити Relayout керувати клавіатурою: Системні параметри → Приватність і безпека → Універсальний доступ.</p>
+        <button id="grant" type="button">Відкрити запит дозволу</button>
+      </section>
+
+      <label for="hotkey">Гаряча клавіша</label>
+      <div class="row">
+        <input id="hotkey" type="text" readonly aria-describedby="hint" />
+      </div>
+      <p id="hint" class="hint">Клацни в полі й натисни нову комбінацію.</p>
+      <p id="error" class="error" role="alert" hidden></p>
+
+      <label class="check">
+        <input id="autostart" type="checkbox" />
+        Запускати разом із системою
+      </label>
+
+      <p class="privacy">Relayout не стежить за клавіатурою, не надсилає нічого в мережу й ніде не зберігає твій текст.</p>
+    </main>
+    <script src="main.js"></script>
+  </body>
+</html>
