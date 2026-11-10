@@ -19,6 +19,8 @@ pub fn switch_to(_lang: Lang) {}
 
 pub fn wait_for_modifiers_release() {}
 
+pub fn caps_lock_off() {}
+
 pub fn copy() {}
 
 pub fn paste() {}

@@ -8,8 +8,8 @@ use relayout_core::layouts::{EN_US, UK_WIN, UK_WIN_ENHANCED};
 use relayout_core::{Lang, Layout};
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
     GetAsyncKeyState, GetKeyboardLayout, GetKeyboardLayoutList, MapVirtualKeyExW, SendInput,
-    ToUnicodeEx, HKL, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYEVENTF_EXTENDEDKEY,
-    KEYEVENTF_KEYUP, VIRTUAL_KEY, VK_CONTROL, VK_LEFT, VK_LWIN, VK_MENU, VK_RWIN, VK_SHIFT,
+    ToUnicodeEx, GetKeyState, HKL, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYEVENTF_EXTENDEDKEY,
+    KEYEVENTF_KEYUP, VIRTUAL_KEY, VK_CAPITAL, VK_CONTROL, VK_LEFT, VK_LWIN, VK_MENU, VK_RWIN, VK_SHIFT,
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     GetForegroundWindow, GetWindowThreadProcessId, PostMessageW, WM_INPUTLANGCHANGEREQUEST,
@@ -151,4 +151,11 @@ pub fn paste() {
 
 pub fn select_previous_word() {
     chord(&[VK_CONTROL, VK_SHIFT], VK_LEFT);
+}
+
+/// Caps Lock is a toggle: press it once if it is on.
+pub fn caps_lock_off() {
+    if unsafe { GetKeyState(VK_CAPITAL as i32) } & 1 != 0 {
+        chord(&[], VK_CAPITAL);
+    }
 }

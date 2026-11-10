@@ -21,6 +21,23 @@ extern "C" {
     fn TISSelectInputSource(source: TISInputSourceRef) -> i32;
 }
 
+#[link(name = "IOKit", kind = "framework")]
+extern "C" {
+    fn IOServiceMatching(name: *const std::ffi::c_char) -> *mut c_void;
+    fn IOServiceGetMatchingService(main_port: u32, matching: *mut c_void) -> u32;
+    fn IOServiceOpen(service: u32, owning_task: u32, kind: u32, connect: *mut u32) -> i32;
+    fn IOServiceClose(connect: u32) -> i32;
+    fn IOObjectRelease(object: u32) -> i32;
+    fn IOHIDSetModifierLockState(connect: u32, selector: i32, state: bool) -> i32;
+}
+
+extern "C" {
+    static mach_task_self_: u32;
+}
+
+const IOHID_PARAM_CONNECT_TYPE: u32 = 1;
+const IOHID_CAPS_LOCK_STATE: i32 = 1;
+
 #[link(name = "ApplicationServices", kind = "framework")]
 extern "C" {
     static kAXTrustedCheckOptionPrompt: CFStringRef;
@@ -164,4 +181,32 @@ pub fn paste() {
 
 pub fn select_previous_word() {
     key(KEY_LEFT, CGEventFlags::CGEventFlagAlternate | CGEventFlags::CGEventFlagShift);
+}
+
+/// Runs `f` with a connection to the HID system, which owns the Caps Lock state.
+fn with_hid_system<T>(f: impl FnOnce(u32) -> T) -> Option<T> {
+    unsafe {
+        let matching = IOServiceMatching(c"IOHIDSystem".as_ptr());
+        // Takes ownership of `matching`. Port 0 is the default main port.
+        let service = IOServiceGetMatchingService(0, matching);
+        if service == 0 {
+            return None;
+        }
+        let mut connect = 0;
+        let opened = IOServiceOpen(service, mach_task_self_, IOHID_PARAM_CONNECT_TYPE, &mut connect);
+        IOObjectRelease(service);
+        if opened != 0 {
+            return None;
+        }
+        let result = f(connect);
+        IOServiceClose(connect);
+        Some(result)
+    }
+}
+
+/// Turns Caps Lock off. Needs no permission beyond the app's own.
+pub fn caps_lock_off() {
+    with_hid_system(|connect| unsafe {
+        IOHIDSetModifierLockState(connect, IOHID_CAPS_LOCK_STATE, false);
+    });
 }

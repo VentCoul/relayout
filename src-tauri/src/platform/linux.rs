@@ -187,6 +187,24 @@ pub fn switch_to(lang: Lang) {
         .map(|cookie| cookie.check());
 }
 
+/// Caps Lock is the XKB "Lock" modifier: unlock it.
+pub fn caps_lock_off() {
+    let Some(conn) = connect() else { return };
+    let none = xproto::ModMask::from(0u16);
+    let _ = conn
+        .xkb_latch_lock_state(
+            xkb::ID::USE_CORE_KBD.into(),
+            xproto::ModMask::LOCK,
+            none,
+            false,
+            xkb::Group::M1,
+            none,
+            false,
+            0,
+        )
+        .map(|cookie| cookie.check());
+}
+
 /// X11 delivers synthetic keystrokes together with the modifiers the user is
 /// physically holding, so wait until the hotkey is fully released.
 pub fn wait_for_modifiers_release() {

@@ -80,12 +80,14 @@ fn run(app: &AppHandle) {
     }
 
     let mut target: Option<Lang> = None;
+    let mut caps_fixed = false;
     if let Some(mut original) = text {
         if let Some(mut converted) = relayout_core::convert(&original, en, uk, hint) {
             if set_private_text(clipboard, &converted.text) {
                 platform::paste();
                 thread::sleep(PASTE_SETTLE);
-                target = Some(converted.target);
+                target = converted.target;
+                caps_fixed = converted.caps_fixed;
             }
             converted.text.zeroize();
         }
@@ -94,6 +96,9 @@ fn run(app: &AppHandle) {
 
     restore(clipboard, saved);
 
+    if caps_fixed {
+        platform::caps_lock_off();
+    }
     if let Some(lang) = target {
         on_main(app, move || platform::switch_to(lang));
     }
