@@ -40,16 +40,30 @@ fn detect_source(text: &str, hint: Option<Lang>) -> Option<Lang> {
     }
 }
 
-fn map_char(c: char, from: &Layout, to: &Layout) -> char {
-    for (src, dst) in [(from.base, to.base), (from.shift, to.shift)] {
-        if let Some(pos) = src.chars().position(|s| s == c) {
-            return match dst.chars().nth(pos) {
-                Some(mapped) if mapped != layouts::NO_CHAR => mapped,
-                _ => c,
-            };
-        }
+/// The key a typographic quote was typed with. Editors with "smart quotes"
+/// (on by default on macOS) replace `'` and `"` while the user types, so the
+/// mistyped text contains `’` or `“` instead of the character on the key.
+fn plain_quote(c: char) -> Option<char> {
+    match c {
+        '‘' | '’' | '‚' => Some('\''),
+        '“' | '”' | '„' => Some('"'),
+        _ => None,
     }
-    c
+}
+
+fn map_char(c: char, from: &Layout, to: &Layout) -> char {
+    let lookup = |c: char| {
+        for (src, dst) in [(from.base, to.base), (from.shift, to.shift)] {
+            if let Some(pos) = src.chars().position(|s| s == c) {
+                return match dst.chars().nth(pos) {
+                    Some(mapped) if mapped != layouts::NO_CHAR => Some(mapped),
+                    _ => None,
+                };
+            }
+        }
+        None
+    };
+    lookup(c).or_else(|| plain_quote(c).and_then(lookup)).unwrap_or(c)
 }
 
 /// Converts `text` between the `en` and `uk` layouts.
@@ -167,6 +181,14 @@ mod tests {
         assert_eq!(convert("", &EN_US, &UK_MAC_PC, None), None);
         assert_eq!(convert("12345", &EN_US, &UK_MAC_PC, None), None);
         assert_eq!(convert("   ", &EN_US, &UK_MAC_PC, Some(Lang::En)), None);
+    }
+
+    #[test]
+    fn smart_quotes_are_read_as_the_key_that_typed_them() {
+        assert_eq!(pc("Ghjcnj ’lyscnm").text, "Просто єдність");
+        assert_eq!(pc("‘lyscnm").text, "єдність");
+        assert_eq!(pc("“lyscnm").text, "Єдність");
+        assert_eq!(pc("ckjdj ”ghbdsn”").text, "слово ЄпривітЄ");
     }
 
     #[test]
