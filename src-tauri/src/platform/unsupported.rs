@@ -1,4 +1,4 @@
-//! Placeholder for platforms whose layer is not written yet (Linux).
+//! Placeholder for platforms whose layer is not written yet (BSD and others).
 
 use relayout_core::layouts::{EN_US, UK_WIN_ENHANCED};
 use relayout_core::{Lang, Layout};

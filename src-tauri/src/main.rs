@@ -15,6 +15,7 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 const DEFAULT_HOTKEY: &str = "Control+Shift+Space";
+const CONVERT_FLAG: &str = "--convert";
 
 /// The only thing this app ever writes to disk.
 #[derive(Serialize, Deserialize)]
@@ -105,6 +106,16 @@ fn show_settings(app: &AppHandle) {
 
 fn main() {
     let app = tauri::Builder::default()
+        // Must be the first plugin. A second launch (for example
+        // `relayout --convert`, bound to a shortcut in the desktop's own
+        // settings where global hotkeys are unavailable) is forwarded here.
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            if argv.iter().any(|arg| arg == CONVERT_FLAG) {
+                engine::trigger(app.clone());
+            } else {
+                show_settings(app);
+            }
+        }))
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()

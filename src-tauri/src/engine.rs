@@ -6,7 +6,7 @@
 
 use std::borrow::Cow;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc;
+use std::sync::{mpsc, Mutex, MutexGuard};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -56,30 +56,33 @@ fn run(app: &AppHandle) {
     else {
         return;
     };
-    let Ok(mut clipboard) = Clipboard::new() else {
+    let Some(mut guard) = shared_clipboard() else {
+        return;
+    };
+    let Some(clipboard) = guard.as_mut() else {
         return;
     };
 
-    let saved = save(&mut clipboard);
+    let saved = save(clipboard);
     let _ = clipboard.clear();
 
     // Let the hotkey's own key-up reach the focused app before we type.
     thread::sleep(KEY_SETTLE);
     platform::wait_for_modifiers_release();
     platform::copy();
-    let mut text = wait_for_text(&mut clipboard);
+    let mut text = wait_for_text(clipboard);
     if text.is_none() {
         // Nothing was selected: take the word before the cursor.
         platform::select_previous_word();
         thread::sleep(KEY_SETTLE);
         platform::copy();
-        text = wait_for_text(&mut clipboard);
+        text = wait_for_text(clipboard);
     }
 
     let mut target: Option<Lang> = None;
     if let Some(mut original) = text {
         if let Some(mut converted) = relayout_core::convert(&original, en, uk, hint) {
-            if set_private_text(&mut clipboard, &converted.text) {
+            if set_private_text(clipboard, &converted.text) {
                 platform::paste();
                 thread::sleep(PASTE_SETTLE);
                 target = Some(converted.target);
@@ -89,11 +92,23 @@ fn run(app: &AppHandle) {
         original.zeroize();
     }
 
-    restore(&mut clipboard, saved);
+    restore(clipboard, saved);
 
     if let Some(lang) = target {
         on_main(app, move || platform::switch_to(lang));
     }
+}
+
+/// One clipboard handle for the whole life of the app. On Linux the process
+/// that set the clipboard has to keep serving it: a handle created per
+/// conversion would take the restored contents with it when dropped.
+fn shared_clipboard() -> Option<MutexGuard<'static, Option<Clipboard>>> {
+    static CLIPBOARD: Mutex<Option<Clipboard>> = Mutex::new(None);
+    let mut guard = CLIPBOARD.lock().unwrap_or_else(|e| e.into_inner());
+    if guard.is_none() {
+        *guard = Some(Clipboard::new().ok()?);
+    }
+    Some(guard)
 }
 
 fn wait_for_text(clipboard: &mut Clipboard) -> Option<String> {
@@ -155,7 +170,12 @@ fn set_private_text(clipboard: &mut Clipboard, text: &str) -> bool {
             .text(text)
             .is_ok()
     }
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    #[cfg(target_os = "linux")]
+    {
+        use arboard::SetExtLinux;
+        clipboard.set().exclude_from_history().text(text).is_ok()
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
     {
         clipboard.set_text(text).is_ok()
     }

@@ -11,6 +11,9 @@ pub enum Lang {
     Uk,
 }
 
+/// Marks a key that produces no character in a table. Never appears in text.
+pub const NO_CHAR: char = '\u{FFFF}';
+
 #[derive(Debug)]
 pub struct Layout {
     pub id: &'static str,

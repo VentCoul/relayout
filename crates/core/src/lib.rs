@@ -43,7 +43,10 @@ fn detect_source(text: &str, hint: Option<Lang>) -> Option<Lang> {
 fn map_char(c: char, from: &Layout, to: &Layout) -> char {
     for (src, dst) in [(from.base, to.base), (from.shift, to.shift)] {
         if let Some(pos) = src.chars().position(|s| s == c) {
-            return dst.chars().nth(pos).unwrap_or(c);
+            return match dst.chars().nth(pos) {
+                Some(mapped) if mapped != layouts::NO_CHAR => mapped,
+                _ => c,
+            };
         }
     }
     c
@@ -164,6 +167,18 @@ mod tests {
         assert_eq!(convert("", &EN_US, &UK_MAC_PC, None), None);
         assert_eq!(convert("12345", &EN_US, &UK_MAC_PC, None), None);
         assert_eq!(convert("   ", &EN_US, &UK_MAC_PC, Some(Lang::En)), None);
+    }
+
+    #[test]
+    fn keys_without_a_character_are_left_alone() {
+        static PARTIAL: Layout = Layout {
+            id: "partial",
+            lang: Lang::Uk,
+            base: "\u{FFFF}1234567890-=йцукенгшщзхїʼфівапролджєячсмитьбю.",
+            shift: "\u{FFFF}!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЇ₴ФІВАПРОЛДЖЄЯЧСМИТЬБЮ,",
+        };
+        let c = convert("`ghbdsn", &EN_US, &PARTIAL, None).unwrap();
+        assert_eq!(c.text, "`привіт");
     }
 
     #[test]
