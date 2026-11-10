@@ -2,6 +2,8 @@
 name = "relayout-core"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/VentCoul/relayout"
 description = "Keyboard layout conversion logic. No I/O, no dependencies."
 
 [dependencies]

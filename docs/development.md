@@ -156,6 +156,6 @@ pnpm test                      # cargo test -p relayout-core
 2. Пройти [тести](#тести) і [ручну перевірку](#ручна-перевірка).
 3. Закомітити й поставити тег: `git tag vX.Y.Z && git push --tags`.
 4. Зібрати інсталятори на macOS (`pnpm build`), Windows (`build-windows.bat`) і Linux (`./build-linux.sh`).
-5. Передати інсталятори користувачам. `TODO` — публікація в GitHub Releases.
+5. Створити реліз на GitHub і прикріпити інсталятори: `gh release create vX.Y.Z <файли інсталяторів>`.
 
 Відкат: встановити інсталятор попередньої версії або зібрати його з тегу (`git checkout vX.Y.Z`).
