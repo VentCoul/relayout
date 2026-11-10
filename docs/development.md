@@ -154,8 +154,12 @@ pnpm test                      # cargo test -p relayout-core
 
 1. Підняти версію в `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml`, `crates/core/Cargo.toml` і `package.json`.
 2. Пройти [тести](#тести) і [ручну перевірку](#ручна-перевірка).
-3. Закомітити й поставити тег: `git tag vX.Y.Z && git push --tags`.
-4. Зібрати інсталятори на macOS (`pnpm build`), Windows (`build-windows.bat`) і Linux (`./build-linux.sh`).
-5. Створити реліз на GitHub і прикріпити інсталятори: `gh release create vX.Y.Z <файли інсталяторів>`.
+3. Закомітити, поставити тег і запушити його: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+4. GitHub Actions (`.github/workflows/release.yml`) прожене тести, збере інсталятори для macOS (Apple Silicon та Intel), Windows і Linux і прикріпить їх до **чернетки** релізу.
+5. Перевірити чернетку на сторінці Releases (наприклад, встановити інсталятор хоча б на одній системі) і опублікувати її.
+
+Пробну збірку без тегу й без релізу можна запустити вручну: Actions → Release → «Run workflow». Інсталятори тоді лежатимуть в артефактах запуску.
+
+Кожен пуш у `main` і кожен pull request проганяє тести ядра (`.github/workflows/ci.yml`).
 
 Відкат: встановити інсталятор попередньої версії або зібрати його з тегу (`git checkout vX.Y.Z`).
