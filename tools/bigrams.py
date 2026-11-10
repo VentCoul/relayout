@@ -5,8 +5,8 @@ Usage: python3 tools/bigrams.py EN_CORPUS.txt UK_CORPUS.txt > crates/core/src/bi
 
 Any large plain-text samples of each language work. Only counts of letter
 pairs end up in the output, never the text itself. The committed tables were
-built from the English and Ukrainian UI strings shipped in macOS
-(the *.loctable files under /System/Library and /Applications).
+built from the English and Ukrainian UI strings shipped in macOS, collected by
+tools/extract_macos_corpus.py.
 """
 
 import math
